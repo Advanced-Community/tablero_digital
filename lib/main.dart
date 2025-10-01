@@ -1,88 +1,9 @@
-// pubspec.yaml dependencies needed:
-// dependencies:
-//   flutter:
-//     sdk: flutter
-//   socket_io_client: ^2.0.3+1
-//   provider: ^6.1.1
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'dart:math' as math;
+import 'package:tablero_digital/provider/game.provider.dart';
+import 'package:tablero_digital/services/tv.socket.dart';
 
-// Same GameState model as control app
-class GameState extends ChangeNotifier {
-  String team1Name = "Equipo Azul";
-  String team2Name = "Equipo Rojo";
-  int team1Score = 0;
-  int team2Score = 0;
-  int team1Sets = 0;
-  int team2Sets = 0;
-  int currentSet = 1;
-  bool isGameActive = false;
-
-  void updateFromJson(Map<String, dynamic> data) {
-    team1Name = data['team1Name'] ?? team1Name;
-    team2Name = data['team2Name'] ?? team2Name;
-    team1Score = data['team1Score'] ?? team1Score;
-    team2Score = data['team2Score'] ?? team2Score;
-    team1Sets = data['team1Sets'] ?? team1Sets;
-    team2Sets = data['team2Sets'] ?? team2Sets;
-    currentSet = data['currentSet'] ?? currentSet;
-    isGameActive = data['isGameActive'] ?? isGameActive;
-    notifyListeners();
-  }
-}
-
-// TV Socket Service
-class TVSocketService {
-  static IO.Socket? _socket;
-  static GameState? _gameState;
-  static bool isConnected = false;
-
-  static void init(GameState gameState, {String serverUrl = 'http://localhost:5215'}) {
-    _gameState = gameState;
-    _socket = IO.io(serverUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    _socket!.connect();
-
-    _socket!.on('connect', (_) {
-      print('TV Display connected to server');
-      isConnected = true;
-    });
-
-    _socket!.on('scoreUpdate', (data) {
-      if (_gameState != null) {
-        _gameState!.updateFromJson(Map<String, dynamic>.from(data));
-      }
-    });
-
-    _socket!.on('disconnect', (_) {
-      print('TV Display disconnected from server');
-      isConnected = false;
-    });
-
-    _socket!.on('sound', (data) {
-      print('SOUND');
-    });
-  }
-
-  static void dispose() {
-    _socket?.dispose();
-  }
-
-  static void connect() {
-    _socket!.connect();
-  }
-
-  static void disconnect() {
-    _socket!.disconnect();
-  }
-}
 
 void main() {
   // Force landscape orientation for TV
@@ -309,7 +230,7 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                 ),
 
                 // Separator
-/*                 Column(
+                /*                 Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -362,8 +283,7 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
               children: [
                 SizedBox(
                   height: 100,
-                  child: Expanded(
-                    child: TextField(
+                  child: TextField(
                       inputFormatters: [
                         //Only numbers and dots
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.:0-9]')),
@@ -400,7 +320,6 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                         _connectToServer();
                       },
                     ),
-                  ),
                 ),
               ],
             ),
