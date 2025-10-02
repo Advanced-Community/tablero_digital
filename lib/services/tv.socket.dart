@@ -11,9 +11,9 @@ class TVSocketService {
   static IO.Socket? _socket;
   static GameState? _gameState;
   static bool isConnected = false;
-  static String _serverUrl = 'http://localhost:5215';
+  static String _serverUrl = 'https://panel.acteam.dev';
 
-  static void init(GameState gameState, {String serverUrl = 'http://localhost:5215'}) {
+  static void init(GameState gameState, {String serverUrl = 'https://panel.acteam.dev'}) {
     _gameState = gameState;
     _serverUrl = serverUrl;
     _socket = IO.io(serverUrl, <String, dynamic>{

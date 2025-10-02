@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:tablero_digital/provider/game.provider.dart';
 import 'package:tablero_digital/services/tv.socket.dart';
 
-
 void main() {
   // Force landscape orientation for TV
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +37,7 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
   late AnimationController _slideController;
   final TextEditingController _serverController = TextEditingController(text: 'localhost:5215');
   String? errorText;
+  bool isHttps = true;
 
   @override
   void initState() {
@@ -270,99 +270,121 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text('Configurar Conexión', style: TextStyle(color: Colors.white, fontSize: 20)),
-          ),
-          content: SizedBox(
-            height: 100,
-            width: 420,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 100,
-                  child: TextField(
-                      inputFormatters: [
-                        //Only numbers and dots
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.:0-9]')),
+        return StatefulBuilder(
+          builder: (context, localSetState) {
+            return AlertDialog(
+              backgroundColor: Colors.grey[900],
+              title: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    Text('Configurar Conexión', style: TextStyle(color: Colors.white, fontSize: 20)),
+                    Row(
+                      children: [
+                        Text(" - Con HTTPS:", style: TextStyle(color: Colors.white, fontSize: 12)),
+                        Checkbox(
+                          value: isHttps,
+                          checkColor: Colors.white,
+                          onChanged: (value) {
+                            localSetState(() {
+                              isHttps = value!;
+                            });
+                          },
+                        ),
                       ],
-                      controller: _serverController,
-                      style: TextStyle(color: Colors.white, fontSize: 30),
-                      expands: true,
-                      maxLines: null,
-                      minLines: null,
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done,
-                      decoration: InputDecoration(
-                        error: errorText != null ? Text(errorText!, style: TextStyle(color: Colors.red)) : null,
-                        labelText: 'IP del servidor (ej: 192.168.1.1:5215)',
-                        labelStyle: TextStyle(color: Colors.grey, fontSize: 30),
-                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
-                      ),
-                      //FocusScope.of(context).unfocus();
-                      //onTap open keyboard
-                      onTap: () {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                      },
-                      autofocus: true,
-                      onChanged: (value) {
-                        if (value.isEmpty || !RegExp(r'^[0-9.:]+$').hasMatch(value)) {
-                          errorText = "Dirección inválida";
-                        } else {
-                          errorText = null;
-                        }
-                        setState(() {});
-                      },
-                      onSubmitted: (value) {
-                        _connectToServer();
-                      },
                     ),
+                  ],
+                ),
+              ),
+              content: SizedBox(
+                height: 100,
+                width: 420,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      child: TextField(
+                        inputFormatters: [
+                          //Only numbers and dots
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.:0-9]')),
+                        ],
+                        controller: _serverController,
+                        style: TextStyle(color: Colors.white, fontSize: 30),
+                        expands: true,
+                        maxLines: null,
+                        minLines: null,
+                        keyboardType: TextInputType.url,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          error: errorText != null ? Text(errorText!, style: TextStyle(color: Colors.red)) : null,
+                          labelText: 'IP del servidor (ej: 192.168.1.1:5215)',
+                          labelStyle: TextStyle(color: Colors.grey, fontSize: 30),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                        ),
+                        //FocusScope.of(context).unfocus();
+                        //onTap open keyboard
+                        onTap: () {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                        },
+                        autofocus: true,
+                        onChanged: (value) {
+                          if (value.isEmpty || !RegExp(r'^[0-9.:]+$').hasMatch(value)) {
+                            errorText = "Dirección inválida";
+                          } else {
+                            errorText = null;
+                          }
+                          setState(() {});
+                        },
+                        onSubmitted: (value) {
+                          _connectToServer();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  style:
+                      TextButton.styleFrom(
+                        padding: const EdgeInsets.all(0),
+                        minimumSize: const Size(40, 40),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        alignment: Alignment.center,
+                      ).copyWith(
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                          if (states.contains(WidgetState.focused)) {
+                            return Colors.white;
+                          }
+                          return Colors.red; // Defer to the default
+                        }),
+                      ),
+                  child: Text('Cancelar', style: TextStyle(fontSize: 14)),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                TextButton(
+                  style:
+                      TextButton.styleFrom(
+                        padding: const EdgeInsets.all(0),
+                        minimumSize: const Size(40, 40),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        alignment: Alignment.center,
+                      ).copyWith(
+                        overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                          if (states.contains(WidgetState.focused)) {
+                            return Colors.white;
+                          }
+                          return Colors.green; // Defer to the default
+                        }),
+                      ),
+                  child: Text('Conectar', style: TextStyle(fontSize: 14)),
+                  onPressed: _connectToServer,
                 ),
               ],
-            ),
-          ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          actions: [
-            TextButton(
-              style:
-                  TextButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    minimumSize: const Size(40, 40),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center,
-                  ).copyWith(
-                    overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-                      if (states.contains(WidgetState.focused)) {
-                        return Colors.white;
-                      }
-                      return Colors.red; // Defer to the default
-                    }),
-                  ),
-              child: Text('Cancelar', style: TextStyle(fontSize: 14)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              style:
-                  TextButton.styleFrom(
-                    padding: const EdgeInsets.all(0),
-                    minimumSize: const Size(40, 40),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    alignment: Alignment.center,
-                  ).copyWith(
-                    overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
-                      if (states.contains(WidgetState.focused)) {
-                        return Colors.white;
-                      }
-                      return Colors.green; // Defer to the default
-                    }),
-                  ),
-              child: Text('Conectar', style: TextStyle(fontSize: 14)),
-              onPressed: _connectToServer,
-            ),
-          ],
+            );
+          },
         );
       },
     );
