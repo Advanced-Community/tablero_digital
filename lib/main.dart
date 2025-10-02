@@ -12,6 +12,13 @@ void main() {
   runApp(ScoreboardDisplayApp());
 }
 
+class FontSizes {
+  double fontSizeTeamName;
+  double fontSizeScore;
+  double fontSizeSets;
+  FontSizes({this.fontSizeTeamName = 44, this.fontSizeScore = 170, this.fontSizeSets = 50});
+}
+
 class ScoreboardDisplayApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -38,6 +45,8 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
   final TextEditingController _serverController = TextEditingController(text: 'localhost:5215');
   String? errorText;
   bool isHttps = true;
+  FontSizes fontSizes = FontSizes();
+  double separateHeight = 10.0;
 
   @override
   void initState() {
@@ -58,6 +67,15 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
     });
   }
 
+  void setFontSize({required int value}) {
+    setState(() {
+      fontSizes.fontSizeTeamName = (fontSizes.fontSizeTeamName + value).clamp(20, 100) as double;
+      fontSizes.fontSizeScore = (fontSizes.fontSizeScore + value).clamp(20, 500) as double;
+      fontSizes.fontSizeSets = (fontSizes.fontSizeSets + value).clamp(10, 100) as double;
+      separateHeight = (separateHeight + value).clamp(0.0, 10.0);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,9 +88,9 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Header with set info
+                // Botones de ajuste de fuentes en el header
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     TextButton(
@@ -95,8 +113,59 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                       },
                       child: Text(
                         "■",
-                        style: TextStyle(color: TVSocketService.isConnected ? Colors.green : Colors.red, fontSize: 20, fontFamily: 'Leds'),
+                        style: TextStyle(
+                          color: TVSocketService.isConnected ? Colors.green : Colors.red,
+                          fontSize: 20,
+                          fontFamily: 'Leds'
+                        ),
                       ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          style:
+                          TextButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
+                            minimumSize: const Size(40, 40),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.center,
+                          ).copyWith(
+                            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.white;
+                              }
+                              return null; // Defer to the default
+                            }),
+                          ),
+                          icon: Icon(Icons.remove_circle_outline, color: Colors.white),
+                          onPressed: () {
+                            setFontSize(value: -10);
+                          },
+                        ),
+                        SizedBox(width: 10),
+                        IconButton(
+                          style:
+                          TextButton.styleFrom(
+                            padding: const EdgeInsets.all(0),
+                            minimumSize: const Size(40, 40),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            alignment: Alignment.center,
+                          ).copyWith(
+                            overlayColor: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.white;
+                              }
+                              return null; // Defer to the default
+                            }),
+                          ),
+                          icon: Icon(Icons.add_circle_outline, color: Colors.white),
+                          onPressed: () {
+                            setFontSize(value: 10);
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -159,34 +228,32 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
 
   Widget _buildTeamDisplay(String teamName, int score, Color teamColor, {required bool isLeft}) {
     return Container(
-      /* decoration: BoxDecoration(
-        color: teamColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: teamColor, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: teamColor.withOpacity(0.3),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ), */
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Team name
           Text(
             teamName.toUpperCase(),
-            style: TextStyle(color: teamColor, fontSize: 44, fontFamily: 'Leds', letterSpacing: 3),
+            style: TextStyle(
+              color: teamColor,
+              fontSize: fontSizes.fontSizeTeamName, // Se actualiza aquí
+              fontFamily: 'Leds',
+              letterSpacing: 3,
+            ),
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 10),
+          SizedBox(height: separateHeight),
 
           // Score display with animation y FittedBox
           Text(
             score.toString(),
-            style: TextStyle(color: const Color.fromARGB(255, 50, 255, 50), fontSize: 170, fontWeight: FontWeight.w100, fontFamily: 'Leds'),
+            style: TextStyle(
+              color: const Color.fromARGB(255, 50, 255, 50),
+              fontSize: fontSizes.fontSizeScore, // Se actualiza aquí
+              fontWeight: FontWeight.w100,
+              fontFamily: 'Leds',
+            ),
           ),
         ],
       ),
@@ -207,7 +274,6 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
               'SETS GANADOS',
               style: TextStyle(color: Colors.white, fontSize: 20, fontFamily: 'Leds', letterSpacing: 2),
             ),
-            //SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -224,23 +290,14 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                     SizedBox(height: 12),
                     Text(
                       gameState.team1Sets.toString(),
-                      style: TextStyle(color: Colors.green, fontSize: 50, fontFamily: 'Leds'),
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: fontSizes.fontSizeSets, // Se actualiza aquí
+                        fontFamily: 'Leds'
+                      ),
                     ),
                   ],
                 ),
-
-                // Separator
-                /*                 Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "|",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white, fontSize: 30, fontFamily: 'Leds'),
-                      ),
-                    ],
-                  ), */
 
                 // Team 2 sets
                 Column(
@@ -254,7 +311,11 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                     SizedBox(height: 12),
                     Text(
                       gameState.team2Sets.toString(),
-                      style: TextStyle(color: Colors.green, fontSize: 50, fontFamily: 'Leds'),
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: fontSizes.fontSizeSets, // Se actualiza aquí
+                        fontFamily: 'Leds'
+                      ),
                     ),
                   ],
                 ),
