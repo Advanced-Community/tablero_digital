@@ -20,6 +20,8 @@ class FontSizes {
 }
 
 class ScoreboardDisplayApp extends StatelessWidget {
+  const ScoreboardDisplayApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -35,11 +37,13 @@ class ScoreboardDisplayApp extends StatelessWidget {
 }
 
 class ScoreboardDisplay extends StatefulWidget {
+  const ScoreboardDisplay({super.key});
+
   @override
-  _ScoreboardDisplayState createState() => _ScoreboardDisplayState();
+  ScoreboardDisplayState createState() => ScoreboardDisplayState();
 }
 
-class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProviderStateMixin {
+class ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _slideController;
   final TextEditingController _serverController = TextEditingController(text: 'localhost:5215');
@@ -439,8 +443,8 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
                           return Colors.green; // Defer to the default
                         }),
                       ),
-                  child: Text('Conectar', style: TextStyle(fontSize: 14)),
                   onPressed: _connectToServer,
+                  child: Text('Conectar', style: TextStyle(fontSize: 14)),
                 ),
               ],
             );
