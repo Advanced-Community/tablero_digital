@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-// Same GameState model as control appclass GameState extends ChangeNotifier {
+// Same GameState model as control app
+class GameState extends ChangeNotifier {
   String team1Name = "Equipo Azul";
   String team2Name = "Equipo Rojo";
   int team1Score = 0;
