@@ -30,7 +30,8 @@ class TVSocketService {
 
     // Listen for playSound event
     _socket!.on('playSound', (data) {
-      /* String soundFile = data['file'] ?? '';
+      /* 
+      String soundFile = data['file'] ?? '';
       if (soundFile.isNotEmpty) {
         // Play sound using just_audio package
         // Note: Ensure you have added just_audio to your pubspec.yaml

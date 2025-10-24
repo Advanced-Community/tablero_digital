@@ -54,7 +54,6 @@ class _ScoreboardDisplayState extends State<ScoreboardDisplay> with TickerProvid
 
     // Initialize animations
     _pulseController = AnimationController(duration: Duration(milliseconds: 1500), vsync: this)..repeat(reverse: true);
-
     _slideController = AnimationController(duration: Duration(milliseconds: 800), vsync: this);
 
     // Initialize socket connection
