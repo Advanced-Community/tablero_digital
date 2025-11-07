@@ -15,6 +15,16 @@ void main() {
   runApp(ScoreboardDisplayApp());
 }
 
+class AppColors {
+  static const Color bgDark = Color(0xFF121212);
+  static const Color bgLight = Color(0xFF1E1E1E);
+  static const Color accentBlue = Color(0xFF2196F3);
+  static const Color accentRed = Color(0xFFE53935);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xB3FFFFFF);
+  static const Color neonGreen = Color(0xFF00E676);
+}
+
 class FontSizes {
   double fontSizeTeamName;
   double fontSizeScore;
@@ -35,7 +45,7 @@ class ScoreboardDisplayApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => GameState(),
       child: MaterialApp(
-        title: 'Cartelera Digital',
+        title: 'Tablero Digital',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -104,16 +114,27 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 22, 22, 22),
-      body: Consumer<GameState>(
-        builder: (context, gameState, child) {
-          return Padding(
-            padding: EdgeInsets.all(4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Botones de ajuste de fuentes en el header
-                /*Focus(
+      body: Material(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              //end: Alignment(0.3, 0.4),
+              colors: <Color>[Colors.blue, Colors.red],
+              stops: [0.53, 0.5],
+              tileMode: TileMode.mirror,
+            ),
+          ),
+          child: Consumer<GameState>(
+            builder: (context, gameState, child) {
+              return Padding(
+                padding: EdgeInsets.all(4),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Botones de ajuste de fuentes en el header
+                    /*Focus(
                   onKeyEvent: (FocusNode node, KeyEvent event) {
                     if (event.logicalKey.debugName == "Go Back" &&
                         node.hasFocus) {
@@ -129,129 +150,155 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
 
                     return KeyEventResult.ignored;
                   },
-                  child: */Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        style:
-                            TextButton.styleFrom(
-                              padding: const EdgeInsets.all(0),
-                              minimumSize: const Size(40, 40),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              alignment: Alignment.center,
-                            ).copyWith(
-                              overlayColor: WidgetStatePropertyAll<Color>(
-                                Colors.white,
+                  child: */
+                    Card(
+                      elevation: 1,
+                      color: const Color.fromARGB(255, 37, 37, 37),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              style:
+                                  TextButton.styleFrom(
+                                    padding: const EdgeInsets.all(0),
+                                    minimumSize: const Size(40, 40),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    alignment: Alignment.center,
+                                  ).copyWith(
+                                    overlayColor: WidgetStatePropertyAll<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                              onPressed: () {
+                                _showConnectionDialog();
+                              },
+                              icon: Icon(
+                                TVSocketService.isConnected
+                                    ? Icons.compass_calibration_sharp
+                                    : Icons.compass_calibration_outlined,
+                                color: TVSocketService.isConnected
+                                    ? Colors.green
+                                    : Colors.red,
                               ),
                             ),
-                        onPressed: () {
-                          _showConnectionDialog();
-                        },
-                        child: Text(
-                          "■",
-                          style: TextStyle(
-                            color: TVSocketService.isConnected
-                                ? Colors.green
-                                : Colors.red,
-                            fontSize: 20,
-                            fontFamily: 'Leds',
-                          ),
+                            SizedBox(width: 10),
+                            Text(
+                              'SET ${gameState.currentSet}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontFamily: 'Leds',
+                                letterSpacing: 2,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  style:
+                                      TextButton.styleFrom(
+                                        padding: const EdgeInsets.all(0),
+                                        minimumSize: const Size(40, 40),
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        alignment: Alignment.center,
+                                      ).copyWith(
+                                        overlayColor:
+                                            WidgetStatePropertyAll<Color>(
+                                              Colors.white,
+                                            ),
+                                        iconColor:
+                                            WidgetStateProperty.resolveWith<
+                                              Color?
+                                            >((Set<WidgetState> states) {
+                                              if (states.contains(
+                                                WidgetState.focused,
+                                              )) {
+                                                return Colors.red;
+                                              }
+                                              return Colors
+                                                  .white; // Defer to the default
+                                            }),
+                                      ),
+                                  icon: Icon(
+                                    Icons.remove_circle_outline,
+                                    //color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    setFontSize(value: -10);
+                                  },
+                                ),
+                                SizedBox(width: 10),
+                                IconButton(
+                                  style:
+                                      TextButton.styleFrom(
+                                        padding: const EdgeInsets.all(0),
+                                        minimumSize: const Size(40, 40),
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        alignment: Alignment.center,
+                                      ).copyWith(
+                                        overlayColor:
+                                            WidgetStatePropertyAll<Color>(
+                                              Colors.white,
+                                            ),
+                                        iconColor:
+                                            WidgetStateProperty.resolveWith<
+                                              Color?
+                                            >((Set<WidgetState> states) {
+                                              if (states.contains(
+                                                WidgetState.focused,
+                                              )) {
+                                                return Color.fromARGB(
+                                                  255,
+                                                  0,
+                                                  149,
+                                                  255,
+                                                );
+                                              }
+                                              return Colors
+                                                  .white; // Defer to the default
+                                            }),
+                                      ),
+                                  icon: Icon(
+                                    Icons.add_circle_outline,
+                                    //color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    setFontSize(value: 10);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                          //),
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            style:
-                                TextButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  minimumSize: const Size(40, 40),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  alignment: Alignment.center,
-                                ).copyWith(
-                                  overlayColor: WidgetStatePropertyAll<Color>(
-                                    Colors.white,
-                                  ),
-                                  iconColor:
-                                      WidgetStateProperty.resolveWith<Color?>((
-                                        Set<WidgetState> states,
-                                      ) {
-                                        if (states.contains(
-                                          WidgetState.focused,
-                                        )) {
-                                          return Colors.red;
-                                        }
-                                        return Colors
-                                            .white; // Defer to the default
-                                      }),
-                                ),
-                            icon: Icon(
-                              Icons.remove_circle_outline,
-                              //color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setFontSize(value: -10);
-                            },
-                          ),
-                          SizedBox(width: 10),
-                          IconButton(
-                            style:
-                                TextButton.styleFrom(
-                                  padding: const EdgeInsets.all(0),
-                                  minimumSize: const Size(40, 40),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  alignment: Alignment.center,
-                                ).copyWith(
-                                  overlayColor: WidgetStatePropertyAll<Color>(
-                                    Colors.white,
-                                  ),
-                                  iconColor:
-                                      WidgetStateProperty.resolveWith<Color?>((
-                                        Set<WidgetState> states,
-                                      ) {
-                                        if (states.contains(
-                                          WidgetState.focused,
-                                        )) {
-                                          return Color.fromARGB(
-                                            255,
-                                            0,
-                                            149,
-                                            255,
-                                          );
-                                        }
-                                        return Colors
-                                            .white; // Defer to the default
-                                      }),
-                                ),
-                            icon: Icon(
-                              Icons.add_circle_outline,
-                              //color: Colors.white,
-                            ),
-                            onPressed: () {
-                              setFontSize(value: 10);
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  //),
+                    ),
+
+                    // Main scoreboard
+                    Expanded(child: _buildMainScoreboard(gameState)),
+
+                    // Sets display
+                    _buildSetsSection(gameState),
+
+                    // Status indicator
+                    //_buildStatusIndicator(gameState),
+                  ],
                 ),
-                // Main scoreboard
-                Expanded(child: _buildMainScoreboard(gameState)),
-
-                // Sets display
-                _buildSetsSection(gameState),
-
-                // Status indicator
-                //_buildStatusIndicator(gameState),
-              ],
-            ),
-          );
-        },
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -265,7 +312,7 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
           child: _buildTeamDisplay(
             gameState.team1Name,
             gameState.team1Score,
-            Colors.blue,
+            Colors.white,
             isLeft: true,
           ),
         ),
@@ -283,7 +330,10 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 3),
                 ),
-                child: Text(
+                child: gameState.isGameActive
+                    ? Image.asset("assets/versus.png")
+                    : Image.asset("assets/pause.png"),
+                /*Text(
                   gameState.isGameActive ? 'VS' : " l l ",
                   style: TextStyle(
                     color: Colors.yellow,
@@ -291,20 +341,10 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
                     fontFamily: 'Leds',
                     letterSpacing: 4,
                   ),
-                ),
+                ),*/
               ),
 
               SizedBox(height: 20),
-
-              Text(
-                'SET ${gameState.currentSet}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 33,
-                  fontFamily: 'Leds',
-                  letterSpacing: 2,
-                ),
-              ),
             ],
           ),
         ),
@@ -315,7 +355,7 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
           child: _buildTeamDisplay(
             gameState.team2Name,
             gameState.team2Score,
-            Colors.red,
+            Colors.white,
             isLeft: false,
           ),
         ),
@@ -359,7 +399,7 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
                 Text(
                   score.toString(),
                   style: TextStyle(
-                    color: const Color.fromARGB(255, 50, 255, 50),
+                    color: Colors.white,
                     fontSize: fontSizes.fontSizeScore,
                     fontWeight: FontWeight.w100,
                     fontFamily: 'Leds',
@@ -392,8 +432,9 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
             Text(
               gameState.team1Sets.toString(),
               style: TextStyle(
-                color: Colors.green,
-                fontSize: fontSizes.fontSizeSets, // Se actualiza aquí
+                color: Colors.white,
+                fontSize: fontSizes.fontSizeSets + 2, // Se actualiza aquí
+                fontWeight: FontWeight.w500,
                 fontFamily: 'Leds',
               ),
             ),
@@ -410,9 +451,10 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
             Text(
               gameState.team2Sets.toString(),
               style: TextStyle(
-                color: Colors.green,
-                fontSize: fontSizes.fontSizeSets, // Se actualiza aquí
+                color: Colors.white,
+                fontSize: fontSizes.fontSizeSets + 2, // Se actualiza aquí
                 fontFamily: 'Leds',
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(width: 40),
@@ -522,222 +564,89 @@ class ScoreboardDisplayState extends State<ScoreboardDisplay>
   void _showConnectionDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, localSetState) {
-            return AlertDialog(
-              backgroundColor: Colors.grey[900],
-              title: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  'Configurar Conexión',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.bgLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          "Configuración de Servidor",
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _serverController,
+              style: const TextStyle(
+                color: AppColors.neonGreen,
+                fontFamily: 'Courier',
+                fontSize: 18,
               ),
-              content: SizedBox(
-                height: 100,
-                width: 420,
-                child: Column(
+              decoration: const InputDecoration(
+                labelText: 'IP / Host del Servidor',
+                labelStyle: TextStyle(color: Colors.grey),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.accentBlue),
+                ),
+                prefixIcon: Icon(Icons.wifi, color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 15),
+            // Checkbox para HTTPS
+            StatefulBuilder(
+              builder: (context, setState) {
+                return Row(
                   children: [
-                    Focus(
-                      autofocus: true,
-                      onKeyEvent: (FocusNode node, KeyEvent event) {
-                        print(
-                          'Type: ${event.runtimeType}, Logical Key: ${event.logicalKey.debugName}, Character: ${event.character ?? 'N/A'}',
-                        );
-
-                        if (event.logicalKey.debugName == "Arrow Down" ||
-                            event.logicalKey.debugName == "Arrow Up") {
-                          node.nextFocus();
-                        }
-
-                        return KeyEventResult.handled; // Consume the event
-                      },
-                      child: SizedBox(
-                        height: 100,
-                        child: TextField(
-                          inputFormatters: [
-                            //Only numbers and dots
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9.:0-9]'),
-                            ),
-                          ],
-                          controller: _serverController,
-                          style: TextStyle(color: Colors.white, fontSize: 30),
-                          expands: true,
-                          maxLines: null,
-                          minLines: null,
-                          keyboardType: TextInputType.url,
-                          cursorColor: Colors.white,
-                          textInputAction: TextInputAction.done,
-                          decoration: InputDecoration(
-                            error: errorText != null
-                                ? Text(
-                                    errorText!,
-                                    style: TextStyle(color: Colors.red),
-                                  )
-                                : null,
-                            labelText: 'IP del servidor (ej: 192.168.1.1:5215)',
-                            labelStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 30,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue),
-                            ),
-                          ),
-                          //FocusScope.of(context).unfocus();
-                          //onTap open keyboard
-                          onTap: () {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                          },
-                          autofocus: true,
-                          onChanged: (value) {
-                            if (value.isEmpty ||
-                                !RegExp(r'^[0-9.:]+$').hasMatch(value)) {
-                              errorText = "Dirección inválida";
-                            } else {
-                              errorText = null;
-                            }
-                            setState(() {});
-                          },
-                          onSubmitted: (value) {
-                            _connectToServer();
-                          },
-                        ),
-                      ),
+                    Checkbox(
+                      value: isHttps,
+                      activeColor: AppColors.accentBlue,
+                      checkColor: Colors.white,
+                      onChanged: (val) => setState(() => isHttps = val ?? true),
+                    ),
+                    const Text(
+                      "Usar HTTPS (Seguro)",
+                      style: TextStyle(color: Colors.white70),
                     ),
                   ],
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.link),
+            label: const Text("CONECTAR"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accentBlue,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              final protocol = isHttps ? 'https' : 'http';
+              final url = '$protocol://${_serverController.text.trim()}';
+
+              TVSocketService.dispose();
+              final gameState = Provider.of<GameState>(context, listen: false);
+              TVSocketService.init(gameState, serverUrl: url);
+
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Conectando a $url..."),
+                  backgroundColor: AppColors.bgLight,
                 ),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey, width: 1.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Con HTTPS:",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Checkbox(
-                          value: isHttps,
-                          activeColor: Colors.green,
-                          overlayColor: WidgetStatePropertyAll<Color>(
-                            Colors.white,
-                          ),
-                          checkColor: isHttps ? Colors.white : Colors.red,
-                          onChanged: (value) {
-                            localSetState(() {
-                              isHttps = value!;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        TextButton(
-                          style:
-                              TextButton.styleFrom(
-                                padding: const EdgeInsets.all(8),
-                                minimumSize: const Size(40, 40),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                alignment: Alignment.center,
-                              ).copyWith(
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.focused,
-                                      )) {
-                                        return Colors.red;
-                                      }
-                                      return Colors
-                                          .white; // Defer to the default
-                                    }),
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.focused,
-                                      )) {
-                                        return Colors.white;
-                                      }
-                                      return Colors.red; // Defer to the default
-                                    }),
-                              ),
-                          child: Text(
-                            'Cancelar',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                        const SizedBox(width: 20),
-                        TextButton(
-                          style:
-                              TextButton.styleFrom(
-                                padding: const EdgeInsets.all(8),
-                                minimumSize: const Size(40, 40),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                alignment: Alignment.center,
-                              ).copyWith(
-                                foregroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.focused,
-                                      )) {
-                                        return Colors.green;
-                                      }
-                                      return Colors
-                                          .white; // Defer to the default
-                                    }),
-                                backgroundColor:
-                                    WidgetStateProperty.resolveWith<Color?>((
-                                      Set<WidgetState> states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.focused,
-                                      )) {
-                                        return Colors.white;
-                                      }
-                                      return Colors
-                                          .green; // Defer to the default
-                                    }),
-                              ),
-                          onPressed: _connectToServer,
-                          child: Text(
-                            'Conectar',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
+              );
+              setState(() {}); // Actualizar icono de estado
+            },
+          ),
+        ],
+      ),
     );
   }
 
